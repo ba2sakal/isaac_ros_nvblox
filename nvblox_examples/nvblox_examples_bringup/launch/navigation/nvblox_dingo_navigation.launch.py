@@ -20,6 +20,10 @@ from typing import List
 import isaac_ros_launch_utils.all_types as lut
 import isaac_ros_launch_utils as lu
 
+from launch.substitutions import TextSubstitution
+from launch.actions import LogInfo
+from launch_ros.actions import Node, ComposableNodeContainer
+
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode
 from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 
@@ -27,7 +31,17 @@ from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     # Nav2 base parameter file
     actions = []
-    nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
+    
+    control = args.control
+    if control == 'mppi':
+        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_mppi_control.yaml')
+    elif control == 'shim_mppi':
+        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
+    elif control == 'smaclattice':
+        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_SmacStateLattice_mppi.yaml')
+    else:
+        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params.yaml')  #DWB Controller
+    
     actions.append(lut.SetParametersFromFile(str(nav_params_path)))
     #actions.append(lut.SetParameter('use_sim_time', False))
     
@@ -46,8 +60,7 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
         ))
 
     # Modifying nav2 parameters depending on nvblox mode
-    # mode = NvbloxMode[args.mode]
-    mode = NvbloxMode.static
+    mode = NvbloxMode[args.mode]
     if mode is NvbloxMode.static:
         costmap_topic_name = '/nvblox_node/static_map_slice'
     elif mode in [NvbloxMode.dynamic, NvbloxMode.people_segmentation]:
@@ -68,6 +81,26 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
             value=costmap_topic_name,
         ))
 
+
+    # ROS 2 Component Container
+    container_name = 'nav2'
+
+    # Component container executable
+    container_exec='component_container_isolated'
+   
+    info = '* Starting Composable node container: /' + container_name
+    actions.append(LogInfo(msg=TextSubstitution(text=info)))
+    
+    # nav2_container = ComposableNodeContainer(
+    #     name=container_name,
+    #     namespace='',
+    #     package='rclcpp_components',
+    #     executable=container_exec,
+    #     arguments=['--use_multi_threaded_executor', '--ros-args', '--log-level', 'info'],
+    #     output='screen',
+    # )
+    # actions.append(nav2_container)
+
     actions.append(
         lu.include(
             'nav2_bringup',
@@ -77,22 +110,24 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
                 'container_name': args.container_name,
                 'use_composition': 'False',
                 'use_sim_time': 'False',
+                # 'container_name': 'nav2_container',
             },
         ))
 
-    actions.append(lu.static_transform('map', 'odom'))
+    # actions.append(lu.static_transform('map', 'odom'))
 
     return actions
 
 def generate_launch_description() -> lut.LaunchDescription:
     args = lu.ArgumentContainer()
 
-    full_container_name = "zed_multi" + '/' + "isaac_ros"
-    info = 'Loading ZED node in container `' + full_container_name + '`'
+    # full_container_name = "zed_multi" + '/' + "isaac_ros"
+    # info = 'Loading ZED node in container `' + full_container_name + '`'
     # actions = [LogInfo(msg=info)]
     
-    # args.add_arg('mode', default_value='static')  # Hard code the mode as static
-    args.add_arg('container_name', full_container_name)   #comment if use_composition is False
+    args.add_arg('control', 'dwb') # DWB controller will be default if no control is specified while launching
+    args.add_arg('mode', 'static')  # 'static' as the default mode
+    args.add_arg('container_name', 'nav2')   #comment if use_composition is False
 
     args.add_opaque_function(add_nvblox_dingo_navigation)
     return lut.LaunchDescription(args.get_launch_actions())
