@@ -33,6 +33,7 @@ def generate_launch_description() -> LaunchDescription:
         'rosbag', 'None', description='Path to rosbag (running on sensor if not set).', cli=True)
     args.add_arg('rosbag_args', '', description='Additional args for ros2 bag play.', cli=True)
     args.add_arg('log_level', 'info', choices=['debug', 'info', 'warn'], cli=True)
+    args.add_arg('nvblox_after_shutdown_map_save_path', '', cli=True)
     actions = args.get_launch_actions()
 
     # Globally set use_sim_time if we're running from bag or sim
@@ -51,6 +52,7 @@ def generate_launch_description() -> LaunchDescription:
                 'container_name': NVBLOX_CONTAINER_NAME,
                 'mode': NvbloxMode.static,
                 'camera': args.camera,
+                'after_shutdown_map_save_path': args.nvblox_after_shutdown_map_save_path
             },
         ))
 
