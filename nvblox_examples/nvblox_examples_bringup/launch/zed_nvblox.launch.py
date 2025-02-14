@@ -47,12 +47,13 @@ def generate_launch_description() -> LaunchDescription:
     actions.append(
         lu.include(
             'nvblox_examples_bringup',
-            'launch/perception/nvblox_core.launch.py',
+            'launch/perception/nvblox_zed.launch.py',
             launch_arguments={
                 'container_name': NVBLOX_CONTAINER_NAME,
                 'mode': NvbloxMode.static,
                 'camera': args.camera,
-                'after_shutdown_map_save_path': args.nvblox_after_shutdown_map_save_path
+                'after_shutdown_map_save_path': args.nvblox_after_shutdown_map_save_path,
+                'nvblox_global_frame': 'asdasdasdasdasd',
             },
         ))
 
