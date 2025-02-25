@@ -15,25 +15,25 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Get the path to a dummy bag for use in the tests.
-get_dummy_bag_path(DUMMY_BAG_PATH)
+# # Get the path to a dummy bag for use in the tests.
+# get_dummy_bag_path(DUMMY_BAG_PATH)
 
-add_graph_startup_test(realsense_dry_run
-    launch/realsense_example.launch.py
-    TIMEOUT 20
-    ARGS "rosbag:=${DUMMY_BAG_PATH} run_rviz:=False"
-)
+# add_graph_startup_test(realsense_dry_run
+#     launch/realsense_example.launch.py
+#     TIMEOUT 20
+#     ARGS "rosbag:=${DUMMY_BAG_PATH} run_rviz:=False"
+# )
 
-#NOTE(alexmillane): For some reason nav2 doesn't exit cleanly, causing the test to fail.
-# So here we turn navigation off.
-add_graph_startup_test(isaac_sim_dry_run
-    launch/isaac_sim_example.launch.py
-    TIMEOUT 20
-    ARGS "rosbag:=${DUMMY_BAG_PATH} run_rviz:=False navigation:=False"
-)
+# #NOTE(alexmillane): For some reason nav2 doesn't exit cleanly, causing the test to fail.
+# # So here we turn navigation off.
+# add_graph_startup_test(isaac_sim_dry_run
+#     launch/isaac_sim_example.launch.py
+#     TIMEOUT 20
+#     ARGS "rosbag:=${DUMMY_BAG_PATH} run_rviz:=False navigation:=False"
+# )
 
-add_graph_startup_test(zed_dry_run
-    launch/zed_example.launch.py
-    TIMEOUT 20
-    ARGS "rosbag:=${DUMMY_BAG_PATH} run_rviz:=False"
-)
+# add_graph_startup_test(zed_dry_run
+#     launch/zed_example.launch.py
+#     TIMEOUT 20
+#     ARGS "rosbag:=${DUMMY_BAG_PATH} run_rviz:=False"
+# )

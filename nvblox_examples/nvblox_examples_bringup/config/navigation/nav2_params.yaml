@@ -182,6 +182,10 @@ global_costmap:
       use_sim_time: True
       footprint: "[ [0.343, 0.2585], [0.343, -0.2585], [-0.343, -0.2585], [-0.343, 0.2585] ]"
       resolution: 0.06
+      width: 50
+      height: 50
+      origin_x: -20.0
+      origin_y: -20.0     
       track_unknown_space: true
       plugins: ['nvblox_layer', 'inflation_layer']
       inflation_layer:
