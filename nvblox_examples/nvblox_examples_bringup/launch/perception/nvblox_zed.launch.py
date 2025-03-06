@@ -22,16 +22,16 @@ from launch_ros.descriptions import ComposableNode
 import isaac_ros_launch_utils as lu
 
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
-from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
+# from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 
 
 def get_zed_remappings(mode: NvbloxMode) -> List[Tuple[str, str]]:
     assert mode is NvbloxMode.static, 'Nvblox only supports static mode for ZED cameras.'
     remappings = []
-    remappings.append(('camera_0/depth/image', '/zed_front/zed_node_0/depth/depth_registered'))
-    remappings.append(('camera_0/depth/camera_info', '/zed_front/zed_node_0/depth/camera_info'))
-    remappings.append(('camera_0/color/image', '/zed_front/zed_node_0/rgb/image_rect_color'))
-    remappings.append(('camera_0/color/camera_info', '/zed_front/zed_node_0/rgb/camera_info'))
+    remappings.append(('camera_0/depth/image', '/zed_multi/zed_front/depth/depth_registered'))
+    remappings.append(('camera_0/depth/camera_info', '/zed_multi/zed_front/depth/camera_info'))
+    remappings.append(('camera_0/color/image', '/zed_multi/zed_front/rgb/image_rect_color'))
+    remappings.append(('camera_0/color/camera_info', '/zed_multi/zed_front/rgb/camera_info'))
     remappings.append(('pose', '/visual_slam/tracking/vo_pose'))
     return remappings
 
@@ -93,7 +93,7 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     parameters.append({'num_cameras': num_cameras})
     parameters.append({'use_lidar': use_lidar})
 
-    # Add the nvblox node.
+    # Add the nvblox node.c
     nvblox_node = ComposableNode(
         name='nvblox_node',
         package='nvblox_ros',
@@ -103,8 +103,8 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     )
 
     actions = []
-    if args.run_standalone:
-        actions.append(lu.component_container(args.container_name))
+    # if args.run_standalone:
+    #     actions.append(lu.component_container(args.container_name))
     actions.append(lu.load_composable_nodes(args.container_name, [nvblox_node]))
     actions.append(
         lu.log_info(
@@ -115,12 +115,15 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
 
 
 def generate_launch_description() -> LaunchDescription:
+    
     args = lu.ArgumentContainer()
     args.add_arg('mode')
     args.add_arg('camera')
     args.add_arg('num_cameras', 1)
     args.add_arg('lidar', 'False')
-    args.add_arg('container_name', NVBLOX_CONTAINER_NAME)
+
+    full_container_name = '/' + "zed_multi" + '/' + "isaac_ros"
+    args.add_arg('container_name', full_container_name)
     args.add_arg('run_standalone', 'False')
 
     args.add_opaque_function(add_nvblox)

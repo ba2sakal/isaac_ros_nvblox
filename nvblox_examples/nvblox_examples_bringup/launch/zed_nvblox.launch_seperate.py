@@ -40,8 +40,8 @@ def generate_launch_description() -> LaunchDescription:
     actions.append(
         SetParameter('use_sim_time', True, condition=IfCondition(lu.is_valid(args.rosbag))))
 
-    # # Container
-    # actions.append(lu.component_container(NVBLOX_CONTAINER_NAME, log_level=args.log_level))
+    # Container
+    actions.append(lu.component_container(NVBLOX_CONTAINER_NAME, log_level=args.log_level))
 
     # Nvblox
     actions.append(
@@ -49,7 +49,7 @@ def generate_launch_description() -> LaunchDescription:
             'nvblox_examples_bringup',
             'launch/perception/nvblox_zed.launch.py',
             launch_arguments={
-                # 'container_name': "/zed_multi/isaac_ros",
+                'container_name': "/zed_multi/isaac_ros",
                 'mode': NvbloxMode.static,
                 'camera': args.camera,
                 'after_shutdown_map_save_path': args.nvblox_after_shutdown_map_save_path,

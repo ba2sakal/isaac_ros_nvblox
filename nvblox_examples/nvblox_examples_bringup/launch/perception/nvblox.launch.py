@@ -22,7 +22,7 @@ from launch_ros.descriptions import ComposableNode
 import isaac_ros_launch_utils as lu
 
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
-from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
+# from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 
 
 def get_isaac_sim_remappings(mode: NvbloxMode, num_cameras: int,
@@ -86,10 +86,10 @@ def get_realsense_remappings(mode: NvbloxMode, num_cameras: int = 1) -> List[Tup
 def get_zed_remappings(mode: NvbloxMode) -> List[Tuple[str, str]]:
     assert mode is NvbloxMode.static, 'Nvblox only supports static mode for ZED cameras.'
     remappings = []
-    remappings.append(('camera_0/depth/image', '/zed_front/zed_node_0/depth/depth_registered'))
-    remappings.append(('camera_0/depth/camera_info', '/zed_front/zed_node_0/depth/camera_info'))
-    remappings.append(('camera_0/color/image', '/zed_front/zed_node_0/rgb/image_rect_color'))
-    remappings.append(('camera_0/color/camera_info', '/zed_front/zed_node_0/rgb/camera_info'))
+    remappings.append(('camera_0/depth/image', '/zed_multi/zed_front/depth/depth_registered'))
+    remappings.append(('camera_0/depth/camera_info', '/zed_multi/zed_front/depth/camera_info'))
+    remappings.append(('camera_0/color/image', '/zed_multi/zed_front/rgb/image_rect_color'))
+    remappings.append(('camera_0/color/camera_info', '/zed_multi/zed_front/rgb/camera_info'))
     remappings.append(('pose', '/zed_front/zed_node_0/pose'))
     return remappings
 
@@ -172,8 +172,8 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     )
 
     actions = []
-    if args.run_standalone:
-        actions.append(lu.component_container(args.container_name))
+    # if args.run_standalone:
+    #     actions.append(lu.component_container(args.container_name))
     actions.append(lu.load_composable_nodes(args.container_name, [nvblox_node]))
     actions.append(
         lu.log_info(
