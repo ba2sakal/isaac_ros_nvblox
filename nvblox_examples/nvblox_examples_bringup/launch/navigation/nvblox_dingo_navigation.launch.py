@@ -27,7 +27,7 @@ from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     # Nav2 base parameter file
     actions = []
-    nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params.yaml')
+    nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
     actions.append(lut.SetParametersFromFile(str(nav_params_path)))
     #actions.append(lut.SetParameter('use_sim_time', False))
     
@@ -74,9 +74,9 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
             'launch/navigation_launch.py',
             launch_arguments={
                 'params_file': str(nav_params_path),
-                'use_composition': 'False',
+                'container_name': args.container_name,
+                'use_composition': 'True',
                 'use_sim_time': 'False',
-                # 'namespace': 'nav2',
             },
         ))
 
@@ -86,8 +86,13 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
 
 def generate_launch_description() -> lut.LaunchDescription:
     args = lu.ArgumentContainer()
+
+    full_container_name = "zed_multi" + '/' + "isaac_ros"
+    info = 'Loading ZED node in container `' + full_container_name + '`'
+    # actions = [LogInfo(msg=info)]
+    
     # args.add_arg('mode', default_value='static')  # Hard code the mode as static
-    args.add_arg('container_name', NVBLOX_CONTAINER_NAME)   #comment if use_composition is False
+    args.add_arg('container_name', full_container_name)   #comment if use_composition is False
 
     args.add_opaque_function(add_nvblox_dingo_navigation)
     return lut.LaunchDescription(args.get_launch_actions())
