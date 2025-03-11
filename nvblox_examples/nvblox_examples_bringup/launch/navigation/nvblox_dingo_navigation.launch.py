@@ -75,7 +75,7 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
             launch_arguments={
                 'params_file': str(nav_params_path),
                 'container_name': args.container_name,
-                'use_composition': 'True',
+                'use_composition': 'False',
                 'use_sim_time': 'False',
             },
         ))

@@ -22,65 +22,7 @@ from launch_ros.descriptions import ComposableNode
 import isaac_ros_launch_utils as lu
 
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
-from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
-
-
-def get_isaac_sim_remappings(mode: NvbloxMode, num_cameras: int,
-                             lidar: bool) -> List[Tuple[str, str]]:
-    remappings = []
-    camera_names = ['front_stereo_camera', 'left_stereo_camera',
-                    'right_stereo_camera'][:num_cameras]
-    for i, name in enumerate(camera_names):
-        remappings.append((f'camera_{i}/depth/image', f'{name}/depth/ground_truth'))
-        remappings.append((f'camera_{i}/depth/camera_info', f'{name}/left/camera_info'))
-        remappings.append((f'camera_{i}/color/image', f'{name}/left/image_raw'))
-        remappings.append((f'camera_{i}/color/camera_info', f'{name}/left/camera_info'))
-    if mode is NvbloxMode.people_segmentation:
-        remappings.append(
-            ('camera_0/mask/image', '/semantic_conversion/front_stereo_camera/semantic_mono8'))
-        remappings.append(('camera_0/mask/camera_info', '/front_stereo_camera/left/camera_info'))
-    if lidar:
-        remappings.append(('pointcloud', '/front_3d_lidar/point_cloud'))
-    return remappings
-
-
-def get_realsense_remappings(mode: NvbloxMode, num_cameras: int = 1) -> List[Tuple[str, str]]:
-    # NOTE(xinjieyao, 04.09.2024): Current in this function we only support:
-    # - On/off emitter flashing + realsense_splitter on camera_0 (front camera).
-    # - (Optional) people segmentation on all cameras.
-    # - (Optional) people detection on all cameras.
-
-    remappings = []
-    for i in range(0, num_cameras):
-        if i == 0:
-            # Only cam0 (i == 0) runs splitter.
-            remappings.append(
-                (f'camera_{i}/depth/image', f'/camera{i}/realsense_splitter_node/output/depth'))
-            remappings.append((f'camera_{i}/depth/camera_info', f'/camera{i}/depth/camera_info'))
-        else:
-            remappings.append((f'camera_{i}/depth/image', f'/camera{i}/depth/image_rect_raw'))
-            remappings.append((f'camera_{i}/depth/camera_info', f'/camera{i}/depth/camera_info'))
-
-        if mode is NvbloxMode.people_segmentation:
-            # nvblox takes resized images from semseg inputs
-            remappings.append(
-                (f'camera_{i}/color/image', f'/camera{i}/segmentation/image_resized'))
-            remappings.append(
-                (f'camera_{i}/color/camera_info', f'/camera{i}/segmentation/camera_info_resized'))
-            remappings.append((f'camera_{i}/mask/image', f'/camera{i}/segmentation/people_mask'))
-            remappings.append(
-                (f'camera_{i}/mask/camera_info', f'/camera{i}/segmentation/camera_info_resized'))
-
-        else:
-            remappings.append((f'camera_{i}/color/image', f'/camera{i}/color/image_raw'))
-            remappings.append((f'camera_{i}/color/camera_info', f'/camera{i}/color/camera_info'))
-
-            if mode is NvbloxMode.people_detection:
-                remappings.append((f'camera_{i}/mask/image', f'/camera{i}/detection/people_mask'))
-                remappings.append(
-                    (f'camera_{i}/mask/camera_info', f'/camera{i}/color/camera_info'))
-
-    return remappings
+# from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 
 
 def get_zed_remappings(mode: NvbloxMode) -> List[Tuple[str, str]]:
@@ -90,7 +32,7 @@ def get_zed_remappings(mode: NvbloxMode) -> List[Tuple[str, str]]:
     remappings.append(('camera_0/depth/camera_info', '/zed_multi/zed_front/depth/camera_info'))
     remappings.append(('camera_0/color/image', '/zed_multi/zed_front/rgb/image_rect_color'))
     remappings.append(('camera_0/color/camera_info', '/zed_multi/zed_front/rgb/camera_info'))
-    remappings.append(('pose', '/zed_front/zed_node_0/pose'))
+    remappings.append(('pose', '/visual_slam/tracking/vo_pose'))
     return remappings
 
 
@@ -105,18 +47,7 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
         assert args.num_cameras == 1, 'NvbloxCamera.realsense shall only be set for num_cameras==1'
 
     base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_base.yaml')
-    segmentation_config = lu.get_path('nvblox_examples_bringup',
-                                      'config/nvblox/specializations/nvblox_segmentation.yaml')
-    detection_config = lu.get_path('nvblox_examples_bringup',
-                                   'config/nvblox/specializations/nvblox_detection.yaml')
-    dynamics_config = lu.get_path('nvblox_examples_bringup',
-                                  'config/nvblox/specializations/nvblox_dynamics.yaml')
-    isaac_sim_config = lu.get_path('nvblox_examples_bringup',
-                                   'config/nvblox/specializations/nvblox_sim.yaml')
-    realsense_config = lu.get_path('nvblox_examples_bringup',
-                                   'config/nvblox/specializations/nvblox_realsense.yaml')
-    multi_realsense_config = lu.get_path(
-        'nvblox_examples_bringup', 'config/nvblox/specializations/nvblox_multi_realsense.yaml')
+
     zed_config = lu.get_path('nvblox_examples_bringup',
                              'config/nvblox/specializations/nvblox_zed.yaml')
 
@@ -162,7 +93,7 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     parameters.append({'num_cameras': num_cameras})
     parameters.append({'use_lidar': use_lidar})
 
-    # Add the nvblox node.
+    # Add the nvblox node.c
     nvblox_node = ComposableNode(
         name='nvblox_node',
         package='nvblox_ros',
@@ -184,12 +115,15 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
 
 
 def generate_launch_description() -> LaunchDescription:
+    
     args = lu.ArgumentContainer()
     args.add_arg('mode')
     args.add_arg('camera')
     args.add_arg('num_cameras', 1)
     args.add_arg('lidar', 'False')
-    args.add_arg('container_name', NVBLOX_CONTAINER_NAME)
+
+    full_container_name = '/' + "zed_multi" + '/' + "isaac_ros"
+    args.add_arg('container_name', full_container_name)
     args.add_arg('run_standalone', 'False')
 
     args.add_opaque_function(add_nvblox)

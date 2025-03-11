@@ -8,10 +8,6 @@
     use_tf_transforms: true
     mapping_type: "static_tsdf"  # ["static_tsdf", "static_occupancy"]
 
-    global_frame: "odom" #The name of the TF frame in which the map is built.
-    # global_frame: "map" #The name of the TF frame in which the map is built.
-
-
     # Parameters governing frequency of different processing steps in the reconstruction pipeline.
     # Processing happens every n:th tick_period. <=0 means that no processing take place
     tick_period_ms: 10
