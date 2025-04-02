@@ -40,6 +40,7 @@
     use_color: true
     # depth settings
     use_depth: true
+
     # lidar settings
     use_lidar: false
     lidar_width: 1800
@@ -47,13 +48,17 @@
     lidar_min_valid_range_m: 0.1
     lidar_max_valid_range_m: 50.0
     use_non_equal_vertical_fov_lidar_params: false
+
     # Input queues
     maximum_input_queue_length: 10
+
     # Map clearing settings
     map_clearing_radius_m: -1.0 # no map clearing if < 0.0
     map_clearing_frame_id: "base_link"
+
     # QoS settings
     input_qos: "SYSTEM_DEFAULT"
+    
     # Visualization
     esdf_slice_bounds_visualization_attachment_frame_id: "base_link"
     esdf_slice_bounds_visualization_side_length: 10.0

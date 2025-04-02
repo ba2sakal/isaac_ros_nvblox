@@ -42,9 +42,9 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     else:
         nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params.yaml')  #DWB Controller
     
+    print(nav_params_path)
     actions.append(lut.SetParametersFromFile(str(nav_params_path)))
     #actions.append(lut.SetParameter('use_sim_time', False))
-    
     # nvblox specific parameters
     actions.append(
         lu.set_parameter(
@@ -61,12 +61,15 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
 
     # Modifying nav2 parameters depending on nvblox mode
     mode = NvbloxMode[args.mode]
+    
     if mode is NvbloxMode.static:
         costmap_topic_name = '/nvblox_node/static_map_slice'
     elif mode in [NvbloxMode.dynamic, NvbloxMode.people_segmentation]:
         costmap_topic_name = '/nvblox_node/combined_map_slice'
     else:
         raise Exception(f'Navigation in mode {mode} not implemented.')
+
+    print(f'costmap_topic_name: {costmap_topic_name}')
 
     actions.append(
         lu.set_parameter(
@@ -81,26 +84,6 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
             value=costmap_topic_name,
         ))
 
-
-    # ROS 2 Component Container
-    container_name = 'nav2'
-
-    # Component container executable
-    container_exec='component_container_isolated'
-   
-    info = '* Starting Composable node container: /' + container_name
-    actions.append(LogInfo(msg=TextSubstitution(text=info)))
-    
-    # nav2_container = ComposableNodeContainer(
-    #     name=container_name,
-    #     namespace='',
-    #     package='rclcpp_components',
-    #     executable=container_exec,
-    #     arguments=['--use_multi_threaded_executor', '--ros-args', '--log-level', 'info'],
-    #     output='screen',
-    # )
-    # actions.append(nav2_container)
-
     actions.append(
         lu.include(
             'nav2_bringup',
@@ -110,24 +93,40 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
                 'container_name': args.container_name,
                 'use_composition': 'False',
                 'use_sim_time': 'False',
-                # 'container_name': 'nav2_container',
             },
         ))
 
-    # actions.append(lu.static_transform('map', 'odom'))
+    actions.append(lu.static_transform('map', 'odom'))
+
+    # ROS 2 Component Container
+    container_name = 'navigation_container'
+
+    # Component container executable
+    container_exec='component_container_isolated'
+   
+    info = '* Starting Composable node container: /' + container_name
+    actions.append(LogInfo(msg=TextSubstitution(text=info)))
+    
+    nav2_container = ComposableNodeContainer(
+        name=container_name,
+        namespace='',
+        package='rclcpp_components',
+        executable=container_exec,
+        arguments=['--use_multi_threaded_executor', '--ros-args', '--log-level', 'info'],
+        output='screen',
+        prefix='nice -n -1'  # <-- This line sets the process priority
+
+    )
+    actions.append(nav2_container)
 
     return actions
 
 def generate_launch_description() -> lut.LaunchDescription:
     args = lu.ArgumentContainer()
-
-    # full_container_name = "zed_multi" + '/' + "isaac_ros"
-    # info = 'Loading ZED node in container `' + full_container_name + '`'
-    # actions = [LogInfo(msg=info)]
-    
+   
     args.add_arg('control', 'dwb') # DWB controller will be default if no control is specified while launching
     args.add_arg('mode', 'static')  # 'static' as the default mode
-    args.add_arg('container_name', 'nav2')   #comment if use_composition is False
+    args.add_arg('container_name', 'navigation_container')   #comment if use_composition is False
 
     args.add_opaque_function(add_nvblox_dingo_navigation)
     return lut.LaunchDescription(args.get_launch_actions())

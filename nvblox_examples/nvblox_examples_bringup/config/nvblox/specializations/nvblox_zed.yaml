@@ -17,7 +17,7 @@
 
     dynamic_mapper:
       esdf_slice_height: 0.0
-      esdf_slice_min_height: -0.1
+      esdf_slice_min_height: 0.1
       esdf_slice_max_height: 0.3
 
     # Original settings

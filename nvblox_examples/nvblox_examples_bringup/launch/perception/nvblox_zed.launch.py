@@ -26,7 +26,6 @@ from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
 
 
 def get_zed_remappings(mode: NvbloxMode) -> List[Tuple[str, str]]:
-    assert mode is NvbloxMode.static, 'Nvblox only supports static mode for ZED cameras.'
     remappings = []
     remappings.append(('camera_0/depth/image', '/zed_multi/zed_front/depth/depth_registered'))
     remappings.append(('camera_0/depth/camera_info', '/zed_multi/zed_front/depth/camera_info'))
@@ -43,13 +42,14 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     num_cameras = int(args.num_cameras)
     use_lidar = lu.is_true(args.lidar)
 
-    if camera == NvbloxCamera.realsense:
-        assert args.num_cameras == 1, 'NvbloxCamera.realsense shall only be set for num_cameras==1'
-
     base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_base.yaml')
 
     zed_config = lu.get_path('nvblox_examples_bringup',
                              'config/nvblox/specializations/nvblox_zed.yaml')
+    
+    
+    dynamics_config = lu.get_path('nvblox_examples_bringup',
+                             'config/nvblox/specializations/nvblox_dynamics.yaml')
 
     if mode is NvbloxMode.static:
         mode_config = {}
@@ -68,21 +68,9 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     if camera is NvbloxCamera.isaac_sim:
         remappings = get_isaac_sim_remappings(mode, num_cameras, use_lidar)
         camera_config = isaac_sim_config
-        assert num_cameras <= 1 or mode is not NvbloxMode.people_segmentation, \
-            'Can not run multiple cameras with people segmentation in Isaac Sim.'
-    elif camera is NvbloxCamera.realsense:
-        remappings = get_realsense_remappings(mode, num_cameras)
-        camera_config = realsense_config
-        assert not use_lidar, 'Can not run lidar for realsense example.'
-    elif camera is NvbloxCamera.multi_realsense:
-        remappings = get_realsense_remappings(mode, num_cameras)
-        camera_config = multi_realsense_config
-        assert not use_lidar, 'Can not run lidar for multi realsense example.'
-    elif camera in [NvbloxCamera.zed2, NvbloxCamera.zedx]:
+    elif camera in [NvbloxCamera.zedx]:
         remappings = get_zed_remappings(mode)
         camera_config = zed_config
-        assert num_cameras == 1, 'Zed example can only run with 1 camera.'
-        assert not use_lidar, 'Can not run lidar for zed example.'
     else:
         raise Exception(f'Camera {camera} not implemented for nvblox.')
 

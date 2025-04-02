@@ -25,8 +25,8 @@ def generate_launch_description() -> LaunchDescription:
     args = lu.ArgumentContainer()
     args.add_arg(
         'camera',
-        NvbloxCamera.zed2,
-        choices=[str(NvbloxCamera.zed2), str(NvbloxCamera.zedx)],
+        NvbloxCamera.zedx,
+        choices=[str(NvbloxCamera.zedx)],
         description='The ZED camera type.',
         cli=True)
     args.add_arg(
@@ -34,11 +34,17 @@ def generate_launch_description() -> LaunchDescription:
     args.add_arg('rosbag_args', '', description='Additional args for ros2 bag play.', cli=True)
     args.add_arg('log_level', 'info', choices=['debug', 'info', 'warn'], cli=True)
     args.add_arg('nvblox_after_shutdown_map_save_path', '', cli=True)
+    args.add_arg(
+        'mode',
+        default=NvbloxMode.static,
+        choices=NvbloxMode.names(),
+        description='The nvblox mode.',
+        cli=True)
     actions = args.get_launch_actions()
 
-    # Globally set use_sim_time if we're running from bag or sim
-    actions.append(
-        SetParameter('use_sim_time', True, condition=IfCondition(lu.is_valid(args.rosbag))))
+    # # Globally set use_sim_time if we're running from bag or sim
+    # actions.append(
+    #     SetParameter('use_sim_time', True, condition=IfCondition(lu.is_valid(args.rosbag))))
 
     # # Container
     # actions.append(lu.component_container(NVBLOX_CONTAINER_NAME, log_level=args.log_level))
@@ -49,8 +55,7 @@ def generate_launch_description() -> LaunchDescription:
             'nvblox_examples_bringup',
             'launch/perception/nvblox_zed.launch.py',
             launch_arguments={
-                # 'container_name': "/zed_multi/isaac_ros",
-                'mode': NvbloxMode.static,
+                'mode': args.mode,
                 'camera': args.camera,
                 'after_shutdown_map_save_path': args.nvblox_after_shutdown_map_save_path,
             },
