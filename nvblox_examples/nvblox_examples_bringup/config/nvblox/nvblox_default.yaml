@@ -9,8 +9,6 @@
     mapping_type: "static_tsdf"  # ["static_tsdf", "static_occupancy"]
 
     global_frame: "odom" #The name of the TF frame in which the map is built.
-    # global_frame: "map" #The name of the TF frame in which the map is built.
-
 
     # Parameters governing frequency of different processing steps in the reconstruction pipeline.
     # Processing happens every n:th tick_period. <=0 means that no processing take place
@@ -22,7 +20,7 @@
     update_esdf_rate_hz: 10.0
     publish_layer_rate_hz: 5.0
     publish_debug_vis_rate_hz: 2.0
-    decay_tsdf_rate_hz: 0.0
+    decay_tsdf_rate_hz: 5.0
     decay_dynamic_occupancy_rate_hz: 10.0
     clear_map_outside_radius_rate_hz: 1.0
 
@@ -43,11 +41,6 @@
 
     # lidar settings
     use_lidar: false
-    lidar_width: 1800
-    lidar_height: 31
-    lidar_min_valid_range_m: 0.1
-    lidar_max_valid_range_m: 50.0
-    use_non_equal_vertical_fov_lidar_params: false
 
     # Input queues
     maximum_input_queue_length: 10
@@ -91,15 +84,17 @@
       occupied_region_occupancy_probability: 0.55
       unobserved_region_occupancy_probability: 0.5
       occupied_region_half_width_m: 0.1
+
       # view calculator
       raycast_subsampling_factor: 4
-      workspace_bounds_type: "unbounded" # ["unbounded", "height_bounds", "bounding_box"]
+      workspace_bounds_type: "height_bounds" # ["unbounded", "height_bounds", "bounding_box"]
       workspace_bounds_min_corner_x_m: 0.0
       workspace_bounds_min_corner_y_m: 0.0
-      workspace_bounds_min_height_m: -0.5
+      workspace_bounds_min_height_m: 0.0
       workspace_bounds_max_corner_x_m: 0.0
       workspace_bounds_max_corner_y_m: 0.0
       workspace_bounds_max_height_m: 2.0
+
       # esdf integrator
       esdf_integrator_min_weight: 0.1
       esdf_integrator_max_site_distance_vox: 2.0

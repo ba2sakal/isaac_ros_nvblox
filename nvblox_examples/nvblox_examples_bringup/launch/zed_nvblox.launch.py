@@ -19,7 +19,6 @@ from isaac_ros_launch_utils.all_types import *
 import isaac_ros_launch_utils as lu
 
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
-from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 
 def generate_launch_description() -> LaunchDescription:
     args = lu.ArgumentContainer()
@@ -55,9 +54,10 @@ def generate_launch_description() -> LaunchDescription:
             'nvblox_examples_bringup',
             'launch/perception/nvblox_zed.launch.py',
             launch_arguments={
-                'mode': args.mode,
+                'base_config' : 'default',
+                'mode': NvbloxMode.static,
                 'camera': args.camera,
-                'after_shutdown_map_save_path': args.nvblox_after_shutdown_map_save_path,
+                'num_cameras' : 1,
             },
         ))
 

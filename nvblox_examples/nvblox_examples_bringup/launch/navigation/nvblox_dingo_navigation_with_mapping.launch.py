@@ -25,8 +25,7 @@ from launch.actions import LogInfo
 from launch_ros.actions import Node, ComposableNodeContainer
 
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode
-from nav2_common.launch import RewrittenYaml
-
+from nvblox_ros_python_utils.nvblox_constants import NVBLOX_CONTAINER_NAME
 
 
 def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
@@ -35,37 +34,17 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     
     control = args.control
     if control == 'mppi':
-        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_map_mppi_control.yaml')
+        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_mppi_control.yaml')
     elif control == 'shim_mppi':
         nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
     elif control == 'smaclattice':
         nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_SmacStateLattice_mppi.yaml')
     else:
         nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params.yaml')  #DWB Controller
-        
-    actions.append(lu.log_info(['Load navigation parameters from: ', str(nav_params_path)]))
-    actions.append(lut.SetParametersFromFile(str(nav_params_path)))
-
-    actions.append(
-    lu.include(
-        'nvblox_examples_bringup',
-        'launch/perception/occupancy_map_server.launch.py',
-        launch_arguments={
-            'occupancy_map_yaml_file': args.occupancy_map_yaml_file,
-        },
-    ))
-
-# # The yaml_filename in navigation_parameters_path somehow overrides the one in occupancy_map_server.launch.py.
-#     # We change the parameter in navigation_parameters_path to the input map file.
-#     navigation_parameters_path = lu.if_else_substitution(
-#         launch_map_server,
-#         RewrittenYaml(source_file=navigation_parameters_path,
-#                       root_key='',
-#                       param_rewrites={'yaml_filename': args.map_yaml_path},
-#                       convert_types=True),
-#         navigation_parameters_path
-#     )
     
+    print(nav_params_path)
+    actions.append(lut.SetParametersFromFile(str(nav_params_path)))
+    #actions.append(lut.SetParameter('use_sim_time', False))
     # nvblox specific parameters
     actions.append(
         lu.set_parameter(
@@ -77,7 +56,7 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
         lu.set_parameter(
             namespace='/global_costmap/global_costmap',
             parameter='plugins',
-            value=['static_map_layer', 'inflation_layer'],
+            value=['nvblox_layer', 'inflation_layer'],
         ))
 
     # Modifying nav2 parameters depending on nvblox mode
@@ -121,6 +100,8 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
 
     # ROS 2 Component Container
     container_name = 'navigation_container'
+
+    # Component container executable
     container_exec='component_container_isolated'
    
     info = '* Starting Composable node container: /' + container_name
@@ -134,21 +115,18 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
         arguments=['--use_multi_threaded_executor', '--ros-args', '--log-level', 'info'],
         output='screen',
         prefix='nice -n -1'  # <-- This line sets the process priority
+
     )
-     
     actions.append(nav2_container)
 
     return actions
 
 def generate_launch_description() -> lut.LaunchDescription:
     args = lu.ArgumentContainer()
-    
-    args.add_arg('occupancy_map_yaml_file', '/workspaces/isaac_ros-dev/maps/occupancy_map/occupancy_map.yaml')
-
+   
     args.add_arg('control', 'dwb') # DWB controller will be default if no control is specified while launching
-    args.add_arg('mode', 'dynamic')  # 'static' as the default mode
-    args.add_arg('container_name', 'navigation_container') 
-
+    args.add_arg('mode', 'static')  # 'static' as the default mode
+    args.add_arg('container_name', 'navigation_container')   #comment if use_composition is False
 
     args.add_opaque_function(add_nvblox_dingo_navigation)
     return lut.LaunchDescription(args.get_launch_actions())

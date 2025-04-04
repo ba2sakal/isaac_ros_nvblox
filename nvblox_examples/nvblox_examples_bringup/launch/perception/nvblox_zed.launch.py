@@ -31,6 +31,19 @@ def get_zed_remappings(mode: NvbloxMode) -> List[Tuple[str, str]]:
     remappings.append(('camera_0/depth/camera_info', '/zed_multi/zed_front/depth/camera_info'))
     remappings.append(('camera_0/color/image', '/zed_multi/zed_front/rgb/image_rect_color'))
     remappings.append(('camera_0/color/camera_info', '/zed_multi/zed_front/rgb/camera_info'))
+
+
+    remappings.append(('camera_1/depth/image', '/zed_multi/zed_left/depth/depth_registered'))
+    remappings.append(('camera_1/depth/camera_info', '/zed_multi/zed_left/depth/camera_info'))
+    remappings.append(('camera_1/color/image', '/zed_multi/zed_left/rgb/image_rect_color'))
+    remappings.append(('camera_1/color/camera_info', '/zed_multi/zed_left/rgb/camera_info'))
+
+
+    remappings.append(('camera_2/depth/image', '/zed_multi/zed_right/depth/depth_registered'))
+    remappings.append(('camera_2/depth/camera_info', '/zed_multi/zed_right/depth/camera_info'))
+    remappings.append(('camera_2/color/image', '/zed_multi/zed_right/rgb/image_rect_color'))
+    remappings.append(('camera_2/color/camera_info', '/zed_multi/zed_right/rgb/camera_info'))
+
     remappings.append(('pose', '/visual_slam/tracking/vo_pose'))
     return remappings
 
@@ -40,28 +53,28 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     mode = NvbloxMode[args.mode]
     camera = NvbloxCamera[args.camera]
     num_cameras = int(args.num_cameras)
-    use_lidar = lu.is_true(args.lidar)
 
-    base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_base.yaml')
+    config = args.base_config
+    if config == 'default':
+        base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_default.yaml')
+    elif config == 'mapping':
+        base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_global_mapping.yaml')
+    elif config == 'navigation':
+        base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_navigation.yaml')
+    else:
+        raise Exception(f"Invalid base_config argument: {args.base_config}")
+
 
     zed_config = lu.get_path('nvblox_examples_bringup',
                              'config/nvblox/specializations/nvblox_zed.yaml')
-    
     
     dynamics_config = lu.get_path('nvblox_examples_bringup',
                              'config/nvblox/specializations/nvblox_dynamics.yaml')
 
     if mode is NvbloxMode.static:
         mode_config = {}
-    elif mode is NvbloxMode.people_segmentation:
-        mode_config = segmentation_config
-        assert not use_lidar, 'Can not run lidar with people segmentation mode.'
-    elif mode is NvbloxMode.people_detection:
-        mode_config = detection_config
-        assert not use_lidar, 'Can not run lidar with people detection mode.'
     elif mode is NvbloxMode.dynamic:
         mode_config = dynamics_config
-        assert not use_lidar, 'Can not run lidar with dynamic mode.'
     else:
         raise Exception(f'Mode {mode} not implemented for nvblox.')
 
@@ -79,7 +92,6 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     parameters.append(mode_config)
     parameters.append(camera_config)
     parameters.append({'num_cameras': num_cameras})
-    parameters.append({'use_lidar': use_lidar})
 
     # Add the nvblox node.c
     nvblox_node = ComposableNode(
@@ -98,7 +110,8 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
         lu.log_info(
             ["Starting nvblox with the '",
              str(camera), "' camera in '",
-             str(mode), "' mode."]))
+             str(mode), "' mode with ",
+             str(config), " 'base_config'."]))
     return actions
 
 
@@ -108,7 +121,8 @@ def generate_launch_description() -> LaunchDescription:
     args.add_arg('mode')
     args.add_arg('camera')
     args.add_arg('num_cameras', 1)
-    args.add_arg('lidar', 'False')
+
+    args.add_arg('base_config', 'default')
 
     full_container_name = '/' + "zed_multi" + '/' + "isaac_ros"
     args.add_arg('container_name', full_container_name)
