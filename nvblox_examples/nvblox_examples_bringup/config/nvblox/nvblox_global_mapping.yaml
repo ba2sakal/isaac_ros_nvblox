@@ -9,8 +9,7 @@
     # QoS settings
     input_qos: "SENSOR_DATA"
 
-    # Where the save PNG + YAML Map
-    after_shutdown_map_save_path: "/workspaces/isaac_ros-dev/maps/occupancy_map/office"
+    mapping_type: "static_tsdf"  # ["static_tsdf", "static_occupancy"]
 
      # color settings
     use_color: false
@@ -19,32 +18,36 @@
     map_clearing_frame_id: "base_link"  # Map clearing settings
     global_frame: "map" #The name of the TF frame in which the map is built.
     
+    # Depth integration rate limit
+    integrate_depth_rate_hz: 35.0
 
+    # Limit visualization overhead
+    integrate_color_rate_hz: -1.0  # no color while mapping
+    update_mesh_rate_hz: -1.0 # no mesh while mapping
+    layer_visualization_exclusion_height_m: 1.4
+    layer_visualization_exclusion_radius_m: 7.0
+    
     # Visualization
     slice_visualization_attachment_frame_id: "base_link"
     layer_streamer_bandwidth_limit_mbps: -1.0
     esdf_mode: "2d" # ["2d", "3d"]
 
     static_mapper:
-      # esdf_slice_height: 0.3
-      # esdf_slice_min_height: 0.09
-      # esdf_slice_max_height: 0.65
-      # projective integrators - Changed to constant to deal with movement in the scene
-      projective_integrator_weighting_mode: "inverse_square_tsdf_distance_penalty"
-      # do not send ceiling:
-      layer_streamer_exclusion_height_m: 1.4
-      layer_streamer_exclusion_radius_m: 5.0
+      # projective integrators
+      # projective_integrator_weighting_mode: "kInverseSquareWeight"
+      projective_integrator_max_integration_distance_m: 7.0  # Distance to map
 
       # view calculator
       raycast_subsampling_factor: 4
       workspace_bounds_type: "height_bounds" # ["unbounded", "height_bounds", "bounding_box"]
-      workspace_bounds_min_height_m: 0.0
-      workspace_bounds_max_height_m: 2.0
+      workspace_bounds_min_height_m: 0.0 # Remove cars bottom gap
+      workspace_bounds_max_height_m: 1.0 #ecrease to decrease gpu usage
 
-    dynamic_mapper:
-      esdf_slice_height: 0.09
-      esdf_slice_min_height: 0.09
-      esdf_slice_max_height: 0.65
+      # do not send ceiling:
+      layer_streamer_exclusion_height_m: 1.4
+      layer_streamer_exclusion_radius_m: 7.0
+
+    update_mesh_rate_hz: -1.0 # no mesh while mapping
 
     decay_tsdf_rate_hz: 0.0
     decay_dynamic_occupancy_rate_hz: 0.0

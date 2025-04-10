@@ -12,15 +12,16 @@
     map_clearing_frame_id: "base_link"
     # Rviz visualization
     esdf_slice_bounds_visualization_attachment_frame_id: "base_link"
+    
     # Reduce decay rate to save compute
     decay_tsdf_rate_hz: 1.0
     decay_dynamic_occupancy_rate_hz: 5.0
     # Depth integration rate limit
-    integrate_depth_rate_hz: 30.0
+    integrate_depth_rate_hz: 35.0
 
     # Limit visualization overhead
     integrate_color_rate_hz: 1.0
-    update_mesh_rate_hz: -1.0
+    update_mesh_rate_hz: 1.0
     layer_visualization_exclusion_height_m: 1.5
     layer_visualization_exclusion_radius_m: 5.0
     layer_streamer_bandwidth_limit_mbps: 150.0
@@ -30,18 +31,24 @@
 
     static_mapper:
         
-      # projective integrators 
-      projective_integrator_weighting_mode: kInverseSquareWeight # ["kInverseSquareDropOffWeight", "constant"]
+      # mapper
+      projective_integrator_max_integration_distance_m: 5.0 
+      #to control the max distance mapping -- Match with costmap
+
+      # projective_integrator_weighting_mode: kInverseSquareWeight  # for better mash "inverse_square_tsdf_distance_penalty" for better planning kInverseSquareWeight
 
       # view calculator (only map inside the height bounds)
       workspace_bounds_type: "height_bounds" # ["unbounded", "height_bounds", "bounding_box"]
       workspace_bounds_min_height_m: 0.0
-      workspace_bounds_max_height_m: 2.0
+      workspace_bounds_max_height_m: 1.0
+
       # tsdf decay - Turned up to deal with movement in the scene
       tsdf_decay_factor: 0.85
+
       # do not send ceiling:
       layer_streamer_exclusion_height_m: 1.4
       layer_streamer_exclusion_radius_m: 5.0
+
       # Disable neighborhood check to speed up the freespace kernel
       check_neighborhood: true
 
@@ -49,3 +56,6 @@
       # occupancy decay integrator
       free_region_decay_probability: 0.55
       occupied_region_decay_probability: 0.30
+      workspace_bounds_type: "height_bounds" # ["unbounded", "height_bounds", "bounding_box"]
+      workspace_bounds_min_height_m: 0.2
+      workspace_bounds_max_height_m: 0.8

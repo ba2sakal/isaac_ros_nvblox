@@ -17,8 +17,23 @@
 
 from isaac_ros_launch_utils.all_types import *
 import isaac_ros_launch_utils as lu
-
+import os
+import yaml
+from ament_index_python.packages import get_package_share_directory
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
+
+def load_config():
+    """
+    Load the YAML configuration file.
+    """
+    config_path = os.path.join(
+        get_package_share_directory('zed_wrapper'),
+        'config',
+        'zed_multi_camera.yaml'
+    )
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 def generate_launch_description() -> LaunchDescription:
     args = lu.ArgumentContainer()
@@ -28,25 +43,42 @@ def generate_launch_description() -> LaunchDescription:
         choices=[str(NvbloxCamera.zedx)],
         description='The ZED camera type.',
         cli=True)
-    args.add_arg(
-        'rosbag', 'None', description='Path to rosbag (running on sensor if not set).', cli=True)
+    args.add_arg('rosbag', 'None', description='Path to rosbag (running on sensor if not set).', cli=True)
     args.add_arg('rosbag_args', '', description='Additional args for ros2 bag play.', cli=True)
     args.add_arg('log_level', 'info', choices=['debug', 'info', 'warn'], cli=True)
     args.add_arg('nvblox_after_shutdown_map_save_path', '', cli=True)
-    args.add_arg(
-        'mode',
-        default=NvbloxMode.static,
-        choices=NvbloxMode.names(),
-        description='The nvblox mode.',
-        cli=True)
+    args.add_arg('mode', default=NvbloxMode.static, choices=NvbloxMode.names(), description='The nvblox mode.', cli=True)
+    args.add_arg('num_cameras')
+
     actions = args.get_launch_actions()
 
-    # # Globally set use_sim_time if we're running from bag or sim
-    # actions.append(
-    #     SetParameter('use_sim_time', True, condition=IfCondition(lu.is_valid(args.rosbag))))
+    config = load_config()
 
-    # # Container
-    # actions.append(lu.component_container(NVBLOX_CONTAINER_NAME, log_level=args.log_level))
+    mode = config['zed_multi_camera'].get('mode')  
+    multi_depth = config['zed_multi_camera'].get('multi_depth') 
+    nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
+    print(mode)
+    if mode == 'mapping_light':
+        nvblox_mode = NvbloxMode.static
+        if multi_depth:
+            num_cameras = 3
+        else:
+            num_cameras = 1
+    elif mode == 'mapping':
+        nvblox_mode = NvbloxMode.static
+        if multi_depth:
+            num_cameras = 3
+        else:
+            num_cameras = 1
+    elif mode == 'navigation':
+        nvblox_mode = NvbloxMode.dynamic
+        if multi_depth:
+            num_cameras = 3
+        else:
+            num_cameras = 1
+    else:
+        print("Wrong mode selected, try again")
+
 
     # Nvblox
     actions.append(
@@ -54,10 +86,11 @@ def generate_launch_description() -> LaunchDescription:
             'nvblox_examples_bringup',
             'launch/perception/nvblox_zed.launch.py',
             launch_arguments={
-                'base_config' : 'default',
-                'mode': NvbloxMode.static,
+                'base_config' : mode,
+                'mode': nvblox_mode,
                 'camera': args.camera,
-                'num_cameras' : 1,
+                'num_cameras' : num_cameras,
+                'after_shutdown_map_save_path': nvblox_map_path
             },
         ))
 

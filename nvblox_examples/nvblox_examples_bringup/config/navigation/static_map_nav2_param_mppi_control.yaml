@@ -75,18 +75,29 @@ bt_navigator_navigate_to_pose_rclcpp_node:
 controller_server:
   ros__parameters:
     controller_frequency: 30.0
+    goal_checker_plugins: ["precise_goal_checker"]  #changed
+    controller_plugins: ["FollowPath"]
+
+    # Goal checker parameters
+    precise_goal_checker:                           #changed
+      plugin: "nav2_controller::SimpleGoalChecker"  #changed
+      xy_goal_tolerance: 0.1                         #changed
+      yaw_goal_tolerance: 0.1                        #changed
+      stateful: True                                 #changed
+
+
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
-      time_steps: 40    #changed
-      model_dt: 0.05    #changed
-      batch_size: 1500  #changed
+      time_steps: 40    
+      model_dt: 0.05    
+      batch_size: 1500  
       vx_std: 0.2
       vy_std: 0.2
-      wz_std: 0.3       #changed
-      vx_max: 0.3       #changed
-      vx_min: -0.3      #changed
-      vy_max: 0.3       #changed
-      wz_max: 0.5       #changed
+      wz_std: 0.3       
+      vx_max: 1.0       
+      vx_min: -1.0      
+      vy_max: 0.3       
+      wz_max: 0.5       
       ax_max: 0.5
       ax_min: -1.0
       ay_max: 0.5
@@ -123,12 +134,12 @@ controller_server:
       GoalAngleCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 3.0
+        cost_weight: 3.0  
         threshold_to_consider: 0.5
       PathAlignCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 14.0
+        cost_weight: 14.0   
         max_path_occupancy_ratio: 0.05
         trajectory_point_step: 4
         threshold_to_consider: 0.5
@@ -137,21 +148,21 @@ controller_server:
       PathFollowCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 5.0
+        cost_weight: 5.0                   #changed
         offset_from_furthest: 5
         threshold_to_consider: 1.4
       PathAngleCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 4.0
-        offset_from_furthest: 4
+        cost_weight: 5.0
+        offset_from_furthest: 5           #changed
         threshold_to_consider: 0.5
-        max_angle_to_furthest: 0.785398
+        max_angle_to_furthest: 0.261799   #changed  #~15 degrees
         forward_preference: true
       PreferForwardCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 2.5
+        cost_weight: 3.0
         threshold_to_consider: 0.5
       # Option to replace Cost and use Obstacles instead
       # ObstaclesCritic:
@@ -224,12 +235,6 @@ global_costmap:
         enabled: True
         cost_scaling_factor: 4.0
         inflation_radius: 0.6
-      nvblox_layer:
-        plugin: "nvblox::nav2::NvbloxCostmapLayer"
-        enabled: True
-        nav2_costmap_global_frame: map # must match with global_frame of global_costmap
-        nvblox_map_slice_topic: "/nvblox_node/combined_map_slice"
-        convert_to_binary_costmap: True
 
 map_server:
   ros__parameters:
@@ -313,8 +318,8 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.5, 0.5, 2.0]
-    min_velocity: [-0.4, -0.4, -2.0]
+    max_velocity: [1.0, 0.6, 2.0]
+    min_velocity: [-1.0, -0.6, -2.0]
     max_accel: [0.5, 0.5, 2.0]
     max_decel: [-1.0, -1.0, -2.0]
     odom_topic: "odom"

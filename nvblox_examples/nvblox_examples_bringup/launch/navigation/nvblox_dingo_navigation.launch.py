@@ -27,7 +27,23 @@ from launch_ros.actions import Node, ComposableNodeContainer
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode
 from nav2_common.launch import RewrittenYaml
 
+import os
+import yaml
+from ament_index_python.packages import get_package_share_directory
 
+
+def load_config():
+    """
+    Load the YAML configuration file.
+    """
+    config_path = os.path.join(
+        get_package_share_directory('zed_wrapper'),
+        'config',
+        'zed_multi_camera.yaml'
+    )
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     # Nav2 base parameter file
@@ -35,7 +51,7 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     
     control = args.control
     if control == 'mppi':
-        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_map_mppi_control.yaml')
+        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/static_map_nav2_param_mppi_control.yaml')
     elif control == 'shim_mppi':
         nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
     elif control == 'smaclattice':
@@ -45,6 +61,7 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
         
     actions.append(lu.log_info(['Load navigation parameters from: ', str(nav_params_path)]))
     actions.append(lut.SetParametersFromFile(str(nav_params_path)))
+
 
     actions.append(
     lu.include(
@@ -142,8 +159,10 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
 
 def generate_launch_description() -> lut.LaunchDescription:
     args = lu.ArgumentContainer()
-    
-    args.add_arg('occupancy_map_yaml_file', '/workspaces/isaac_ros-dev/maps/occupancy_map/occupancy_map.yaml')
+        
+    config = load_config()
+    nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
+    args.add_arg('occupancy_map_yaml_file', nvblox_map_path + '.yaml', description='Path to occupancy map yaml file')
 
     args.add_arg('control', 'dwb') # DWB controller will be default if no control is specified while launching
     args.add_arg('mode', 'dynamic')  # 'static' as the default mode

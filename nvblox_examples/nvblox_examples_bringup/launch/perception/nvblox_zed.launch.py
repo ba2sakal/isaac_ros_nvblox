@@ -57,7 +57,7 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     config = args.base_config
     if config == 'default':
         base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_default.yaml')
-    elif config == 'mapping':
+    elif config in ['mapping', 'mapping_light']:
         base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_global_mapping.yaml')
     elif config == 'navigation':
         base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_navigation.yaml')
@@ -87,11 +87,14 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     else:
         raise Exception(f'Camera {camera} not implemented for nvblox.')
 
+    map_dir = args.after_shutdown_map_save_path
+
     parameters = []
     parameters.append(base_config)
     parameters.append(mode_config)
     parameters.append(camera_config)
     parameters.append({'num_cameras': num_cameras})
+    parameters.append({'after_shutdown_map_save_path': map_dir})
 
     # Add the nvblox node.c
     nvblox_node = ComposableNode(
@@ -103,17 +106,21 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     )
 
     actions = []
-    # if args.run_standalone:
-    #     actions.append(lu.component_container(args.container_name))
     actions.append(lu.load_composable_nodes(args.container_name, [nvblox_node]))
-    actions.append(
-        lu.log_info(
-            ["Starting nvblox with the '",
-             str(camera), "' camera in '",
-             str(mode), "' mode with ",
-             str(config), " 'base_config'."]))
-    return actions
 
+    actions.append(
+        lu.log_info([
+            "\033[94mStarting nvblox with the '\033[0m",         # Blue
+            f"\033[92m{num_cameras} {camera}\033[0m",            # Green
+            "\033[94m' camera in '\033[0m",                      # Blue
+            f"\033[95m{mode}\033[0m",                            # Magenta
+            "\033[94m' mode with '\033[0m",                      # Blue
+            f"\033[96m{config}\033[0m",                          # Cyan
+            "\033[94m' base_config'.\033[0m"                     # Blue
+        ])
+    )
+
+    return actions
 
 def generate_launch_description() -> LaunchDescription:
     
@@ -123,10 +130,10 @@ def generate_launch_description() -> LaunchDescription:
     args.add_arg('num_cameras', 1)
 
     args.add_arg('base_config', 'default')
+    args.add_arg('after_shutdown_map_save_path')
 
     full_container_name = '/' + "zed_multi" + '/' + "isaac_ros"
     args.add_arg('container_name', full_container_name)
-    args.add_arg('run_standalone', 'False')
 
     args.add_opaque_function(add_nvblox)
     return LaunchDescription(args.get_launch_actions())

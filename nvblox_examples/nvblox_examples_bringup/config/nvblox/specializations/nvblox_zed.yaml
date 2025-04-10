@@ -12,13 +12,13 @@
     static_mapper:
       esdf_slice_height: 0.01
       # Expected to be tuned by user: Slice height depends on zedx mounting.
-      esdf_slice_min_height: 0.16
-      esdf_slice_max_height: 0.2
+      esdf_slice_min_height: 0.5
+      esdf_slice_max_height: 0.7
 
     dynamic_mapper:
       esdf_slice_height: 0.01
-      esdf_slice_min_height: 0.1
-      esdf_slice_max_height: 0.3
+      esdf_slice_min_height: 0.5
+      esdf_slice_max_height: 0.7
 
     # Original settings
     #   static_mapper:

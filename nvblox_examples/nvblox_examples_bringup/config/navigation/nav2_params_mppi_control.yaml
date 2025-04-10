@@ -83,11 +83,11 @@ controller_server:
       vx_std: 0.2
       vy_std: 0.2
       wz_std: 0.3       #changed
-      vx_max: 0.3       #changed
-      vx_min: -0.3      #changed
+      vx_max: 1.0       #changed
+      vx_min: -1.0      #changed
       vy_max: 0.3       #changed
       wz_max: 0.5       #changed
-      ax_max: 0.5
+      ax_max: 0.6
       ax_min: -1.0
       ay_max: 0.5
       az_max: 1.5
@@ -197,10 +197,7 @@ local_costmap:
         nav2_costmap_global_frame: odom # must match with global_frame of local_costmap
         nvblox_map_slice_topic: "/nvblox_node/static_map_slice"
         convert_to_binary_costmap: True
-      static_layer:
-        plugin: "nav2_costmap_2d::StaticLayer"
-        map_subscribe_transient_local: True
-      always_send_full_costmap: True
+
 
 global_costmap:
   global_costmap:
@@ -312,8 +309,8 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.5, 0.5, 2.0]
-    min_velocity: [-0.4, -0.4, -2.0]
+    max_velocity: [1.0, 1.0, 2.0]
+    min_velocity: [-1.0, -1.0, -2.0]
     max_accel: [0.5, 0.5, 2.0]
     max_decel: [-1.0, -1.0, -2.0]
     odom_topic: "odom"
