@@ -128,8 +128,8 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
             'launch/navigation_launch.py',
             launch_arguments={
                 'params_file': str(nav_params_path),
-                'container_name': args.container_name,
                 'use_composition': 'False',
+                'container_name': 'navigation_container',
                 'use_sim_time': 'False',
             },
         ))
@@ -137,20 +137,20 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     actions.append(lu.static_transform('map', 'odom'))
 
     # ROS 2 Component Container
-    container_name = 'navigation_container'
+    # container_name = 'navigation_container'
     container_exec='component_container_isolated'
    
-    info = '* Starting Composable node container: /' + container_name
-    actions.append(LogInfo(msg=TextSubstitution(text=info)))
+    # info = '* Starting Composable node container: /' + container_name
+    # actions.append(LogInfo(msg=TextSubstitution(text=info)))
     
     nav2_container = ComposableNodeContainer(
-        name=container_name,
+        name='navigation_container',
         namespace='',
         package='rclcpp_components',
         executable=container_exec,
         arguments=['--use_multi_threaded_executor', '--ros-args', '--log-level', 'info'],
         output='screen',
-        prefix='nice -n -1'  # <-- This line sets the process priority
+        # prefix='nice -n -1'  # <-- This line sets the process priority
     )
      
     actions.append(nav2_container)

@@ -56,22 +56,35 @@ def generate_launch_description() -> LaunchDescription:
 
     mode = config['zed_multi_camera'].get('mode')  
     multi_depth = config['zed_multi_camera'].get('multi_depth') 
-    nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
     print(mode)
     if mode == 'mapping_light':
         nvblox_mode = NvbloxMode.static
+        nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
         if multi_depth:
             num_cameras = 3
         else:
             num_cameras = 1
+            
     elif mode == 'mapping':
         nvblox_mode = NvbloxMode.static
+        nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
         if multi_depth:
             num_cameras = 3
         else:
             num_cameras = 1
+
+    elif mode == 'meshing':
+        nvblox_mode = NvbloxMode.static
+        nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
+
+        if multi_depth:
+            num_cameras = 3
+        else:
+            num_cameras = 1
+            
     elif mode == 'navigation':
         nvblox_mode = NvbloxMode.dynamic
+        nvblox_map_path = ''
         if multi_depth:
             num_cameras = 3
         else:

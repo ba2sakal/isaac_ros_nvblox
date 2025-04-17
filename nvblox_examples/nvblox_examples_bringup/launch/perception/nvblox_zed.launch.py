@@ -55,8 +55,8 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[Action]:
     num_cameras = int(args.num_cameras)
 
     config = args.base_config
-    if config == 'default':
-        base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_default.yaml')
+    if config == 'meshing':
+        base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_meshing.yaml')
     elif config in ['mapping', 'mapping_light']:
         base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_global_mapping.yaml')
     elif config == 'navigation':

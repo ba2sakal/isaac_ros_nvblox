@@ -5,7 +5,7 @@
     # lidar settings
     use_lidar: false
     # visualization
-    layer_streamer_bandwidth_limit_mbps: -1.0 # unlimited
+    layer_streamer_bandwidth_limit_mbps: 100.0 # unlimited
 
     static_mapper:
       # TSDF integrator

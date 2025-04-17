@@ -1,6 +1,6 @@
 bt_navigator:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
     global_frame: map
     robot_base_frame: base_link
     #odom_topic: /odom commented to follow nvblox carter_nav2 yaml
@@ -66,11 +66,11 @@ bt_navigator:
 
 bt_navigator_navigate_through_poses_rclcpp_node:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
 
 bt_navigator_navigate_to_pose_rclcpp_node:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
 
 controller_server:
   ros__parameters:
@@ -96,7 +96,7 @@ controller_server:
       wz_std: 0.3       
       vx_max: 1.0       
       vx_min: -1.0      
-      vy_max: 0.3       
+      vy_max: 0.6       
       wz_max: 0.5       
       ax_max: 0.5
       ax_min: -1.0
@@ -191,7 +191,7 @@ local_costmap:
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base_link
-      #use_sim_time: True
+      #use_sim_time: False #changed
       rolling_window: true
       width: 5
       height: 5
@@ -217,7 +217,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      use_sim_time: True
+      use_sim_time: False #changed
       footprint: "[ [0.343, 0.2585], [0.343, -0.2585], [-0.343, -0.2585], [-0.343, 0.2585] ]"
       resolution: 0.05
       width: 50
@@ -238,14 +238,14 @@ global_costmap:
 
 map_server:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
     # Overridden in launch by the "map" launch configuration or provided default value.
     # To use in yaml, remove the default "map" value in the tb3_simulation_launch.py file & provide full path to map below.
     yaml_filename: ""
 
 map_saver:      #not in Clearpath Dingo yaml
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
     save_map_timeout: 5.0
     free_thresh_default: 0.25
     occupied_thresh_default: 0.65
@@ -254,7 +254,7 @@ map_saver:      #not in Clearpath Dingo yaml
 planner_server:
   ros__parameters:
     expected_planner_frequency: 20.0
-    use_sim_time: True
+    use_sim_time: False #changed
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
@@ -264,7 +264,7 @@ planner_server:
 
 smoother_server:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
     smoother_plugins: ["simple_smoother"]
     simple_smoother:
       plugin: "nav2_smoother::SimpleSmoother"
@@ -291,7 +291,7 @@ behavior_server:
     global_frame: odom
     robot_base_frame: base_link
     transform_tolerance: 0.1
-    use_sim_time: true
+    use_sim_time: False #changed
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
     min_rotational_vel: 0.2
@@ -299,11 +299,11 @@ behavior_server:
 
 robot_state_publisher:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
 
 waypoint_follower:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
     loop_rate: 20
     stop_on_failure: false
     waypoint_task_executor_plugin: "wait_at_waypoint"
@@ -314,7 +314,7 @@ waypoint_follower:
 
 velocity_smoother:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False #changed
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"

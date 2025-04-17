@@ -24,7 +24,7 @@
     # Limit visualization overhead
     integrate_color_rate_hz: -1.0  # no color while mapping
     update_mesh_rate_hz: -1.0 # no mesh while mapping
-    layer_visualization_exclusion_height_m: 1.4
+    layer_visualization_exclusion_height_m: 1.4      #Voxels with a z coordinate above this value are not visualized.
     layer_visualization_exclusion_radius_m: 7.0
     
     # Visualization
@@ -35,16 +35,16 @@
     static_mapper:
       # projective integrators
       # projective_integrator_weighting_mode: "kInverseSquareWeight"
-      projective_integrator_max_integration_distance_m: 7.0  # Distance to map
+      projective_integrator_max_integration_distance_m: 5.0  # Distance to map
 
       # view calculator
       raycast_subsampling_factor: 4
       workspace_bounds_type: "height_bounds" # ["unbounded", "height_bounds", "bounding_box"]
-      workspace_bounds_min_height_m: 0.0 # Remove cars bottom gap
-      workspace_bounds_max_height_m: 1.0 #ecrease to decrease gpu usage
+      workspace_bounds_min_height_m: 0.0 # Remove cars bottom gap #minimal height of the workspace bounds??
+      workspace_bounds_max_height_m: 2.0 #ecrease to decrease gpu usage
 
       # do not send ceiling:
-      layer_streamer_exclusion_height_m: 1.4
+      layer_streamer_exclusion_height_m: 1.4      # Blocks above this height will not be streamed.
       layer_streamer_exclusion_radius_m: 7.0
 
     update_mesh_rate_hz: -1.0 # no mesh while mapping
