@@ -12,6 +12,12 @@
     map_clearing_frame_id: "base_link"
     # Rviz visualization
     esdf_slice_bounds_visualization_attachment_frame_id: "base_link"
+
+    # print_rates_to_console: true
+    # print_timings_to_console: true
+    # print_delays_to_console: true
+    # print_queue_drops_to_console: true
+    # print_statistics_on_console_period_ms: 5000
     
     # Reduce decay rate to save compute
     decay_tsdf_rate_hz: 1.0
@@ -21,10 +27,10 @@
 
     # Limit visualization overhead
     integrate_color_rate_hz: 1.0
-    update_mesh_rate_hz: -1.0
+    update_mesh_rate_hz: 1.0
     layer_visualization_exclusion_height_m: 1.5
     layer_visualization_exclusion_radius_m: 5.0
-    layer_streamer_bandwidth_limit_mbps: 100.0
+    layer_streamer_bandwidth_limit_mbps: -1.0
 
     multi_mapper:
       remove_small_connected_components: true

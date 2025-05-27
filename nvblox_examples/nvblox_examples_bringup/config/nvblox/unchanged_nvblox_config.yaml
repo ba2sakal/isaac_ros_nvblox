@@ -22,7 +22,7 @@
     clear_map_outside_radius_rate_hz: 1.0
 
     # printing statistics on console
-    print_rates_to_console: false
+    print_rates_to_console: true
     print_timings_to_console: false
     print_delays_to_console: false
     print_queue_drops_to_console: false
