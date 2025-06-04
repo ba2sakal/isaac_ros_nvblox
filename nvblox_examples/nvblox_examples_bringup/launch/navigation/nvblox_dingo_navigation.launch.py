@@ -52,12 +52,12 @@ def add_nvblox_dingo_navigation(args: lu.ArgumentContainer) -> List[lut.Action]:
     control = args.control
     if control == 'mppi':
         nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/static_map_nav2_param_mppi_control.yaml')
-    elif control == 'shim_mppi':
-        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
-    elif control == 'smaclattice':
-        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_SmacStateLattice_mppi.yaml')
-    else:
-        nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params.yaml')  #DWB Controller
+    # elif control == 'shim_mppi':
+    #     nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params_shim_mppi.yaml')
+    # elif control == 'smaclattice':
+    #     nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_SmacStateLattice_mppi.yaml')
+    # else:
+    #     nav_params_path = lu.get_path('nvblox_examples_bringup', 'config/navigation/nav2_params.yaml')  #DWB Controller
         
     actions.append(lu.log_info(['Load navigation parameters from: ', str(nav_params_path)]))
     actions.append(lut.SetParametersFromFile(str(nav_params_path)))
@@ -164,8 +164,8 @@ def generate_launch_description() -> lut.LaunchDescription:
     nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
     args.add_arg('occupancy_map_yaml_file', nvblox_map_path + '.yaml', description='Path to occupancy map yaml file')
 
-    args.add_arg('control', 'dwb') # DWB controller will be default if no control is specified while launching
-    args.add_arg('mode', 'dynamic')  # 'static' as the default mode
+    args.add_arg('control', 'mppi') # DWB controller will be default if no control is specified while launching
+    args.add_arg('mode', 'static')  # 'static' as the default mode
     args.add_arg('container_name', 'navigation_container') 
 
 
