@@ -22,18 +22,18 @@ import yaml
 from ament_index_python.packages import get_package_share_directory
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
 
-def load_config():
-    """
-    Load the YAML configuration file.
-    """
-    config_path = os.path.join(
-        get_package_share_directory('zed_wrapper'),
-        'config',
-        'zed_multi_camera.yaml'
-    )
-    with open(config_path, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
+# def load_config():
+#     """
+#     Load the YAML configuration file.
+#     """
+#     config_path = os.path.join(
+#         get_package_share_directory('zed_wrapper'),
+#         'config',
+#         'zed_multi_camera.yaml'
+#     )
+#     with open(config_path, 'r') as file:
+#         config = yaml.safe_load(file)
+#     return config
 
 def generate_launch_description() -> LaunchDescription:
     args = lu.ArgumentContainer()
@@ -43,23 +43,30 @@ def generate_launch_description() -> LaunchDescription:
         choices=[str(NvbloxCamera.zedx)],
         description='The ZED camera type.',
         cli=True)
-    args.add_arg('rosbag', 'None', description='Path to rosbag (running on sensor if not set).', cli=True)
-    args.add_arg('rosbag_args', '', description='Additional args for ros2 bag play.', cli=True)
     args.add_arg('log_level', 'info', choices=['debug', 'info', 'warn'], cli=True)
     args.add_arg('nvblox_after_shutdown_map_save_path', '', cli=True)
-    args.add_arg('mode', default=NvbloxMode.static, choices=NvbloxMode.names(), description='The nvblox mode.', cli=True)
     args.add_arg('num_cameras')
+
+    args.add_arg('mode', default_value='mapping', description='Launch mode: mapping or navigation')
+    args.add_arg('multi_depth', default_value='false', description='Enable multi-depth')
+    args.add_arg('nvblox_map_path', default_value='', description='Path to saved Nvblox occupancy map')
+
 
     actions = args.get_launch_actions()
 
-    config = load_config()
+    ############# DEPRECATED YAML PARAMS ####################
+    # config = load_config()
+    # mode = config['zed_multi_camera'].get('mode')  
+    # multi_depth = config['zed_multi_camera'].get('multi_depth') 
+    # print(mode)
+    ############# DEPRECATED YAML PARAMS ####################
 
-    mode = config['zed_multi_camera'].get('mode')  
-    multi_depth = config['zed_multi_camera'].get('multi_depth') 
-    print(mode)
+    mode = args.mode
+    multi_depth = args.multi_depth
+
     if mode == 'mapping_light':
         nvblox_mode = NvbloxMode.static
-        nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
+        nvblox_map_path = args.nvblox_map_path
         if multi_depth:
             num_cameras = 3
         else:
@@ -67,7 +74,7 @@ def generate_launch_description() -> LaunchDescription:
             
     elif mode == 'mapping':
         nvblox_mode = NvbloxMode.static
-        nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
+        nvblox_map_path = args.nvblox_map_path
         if multi_depth:
             num_cameras = 3
         else:
@@ -75,7 +82,7 @@ def generate_launch_description() -> LaunchDescription:
 
     elif mode == 'meshing':
         nvblox_mode = NvbloxMode.static
-        nvblox_map_path = config['zed_multi_camera'].get('nvblox_map_path') 
+        nvblox_map_path = args.nvblox_map_path
 
         if multi_depth:
             num_cameras = 3
