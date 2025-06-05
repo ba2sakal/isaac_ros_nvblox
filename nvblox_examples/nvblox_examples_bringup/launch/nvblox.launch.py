@@ -15,8 +15,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+
+# Launch utils are very useful library from isaac ros please find in:
+# https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/tree/main/isaac_ros_launch_utils/isaac_ros_launch_utils
 from isaac_ros_launch_utils.all_types import *
 import isaac_ros_launch_utils as lu
+
 import os
 import yaml
 from ament_index_python.packages import get_package_share_directory
