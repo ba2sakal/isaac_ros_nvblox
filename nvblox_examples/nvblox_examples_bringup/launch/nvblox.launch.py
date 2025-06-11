@@ -21,9 +21,10 @@
 from isaac_ros_launch_utils.all_types import *
 import isaac_ros_launch_utils as lu
 
-import os
-import yaml
-from ament_index_python.packages import get_package_share_directory
+# import os
+# import yaml
+# # from ament_index_python.packages import get_package_share_directory
+
 from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
 
 # def load_config():
@@ -39,7 +40,8 @@ from nvblox_ros_python_utils.nvblox_launch_utils import NvbloxMode, NvbloxCamera
 #         config = yaml.safe_load(file)
 #     return config
 
-def generate_launch_description() -> LaunchDescription:
+def launch_setup(context, *args, **kwargs):
+
     args = lu.ArgumentContainer()
     args.add_arg(
         'camera',
@@ -51,22 +53,15 @@ def generate_launch_description() -> LaunchDescription:
     args.add_arg('nvblox_after_shutdown_map_save_path', '', cli=True)
     args.add_arg('num_cameras')
 
-    args.add_arg('mode', default_value='mapping', description='Launch mode: mapping or navigation')
-    args.add_arg('multi_depth', default_value='false', description='Enable multi-depth')
-    args.add_arg('nvblox_map_path', default_value='', description='Path to saved Nvblox occupancy map')
+    args.add_arg('mode', 'mapping', description='Launch mode: mapping or navigation')
+    args.add_arg('multi_depth','false', description='Enable multi-depth')
+    args.add_arg('nvblox_map_path', '', description='Path to saved Nvblox occupancy map')
 
 
     actions = args.get_launch_actions()
 
-    ############# DEPRECATED YAML PARAMS ####################
-    # config = load_config()
-    # mode = config['zed_multi_camera'].get('mode')  
-    # multi_depth = config['zed_multi_camera'].get('multi_depth') 
-    # print(mode)
-    ############# DEPRECATED YAML PARAMS ####################
-
-    mode = args.mode
-    multi_depth = args.multi_depth
+    mode = args.mode.perform(context)
+    multi_depth = args.multi_depth.perform(context).lower() == 'true'
 
     if mode == 'mapping_light':
         nvblox_mode = NvbloxMode.static
@@ -101,12 +96,10 @@ def generate_launch_description() -> LaunchDescription:
         else:
             num_cameras = 1
     else:
-        print("Wrong mode selected, try again")
-
+        raise RuntimeError(f"Wrong mode selected: '{mode}' — try 'mapping', 'mapping_light', 'meshing', or 'navigation'")
 
     # Nvblox
-    actions.append(
-        lu.include(
+    nvblox_launch = lu.include(
             'nvblox_examples_bringup',
             'launch/perception/nvblox_zed.launch.py',
             launch_arguments={
@@ -116,6 +109,14 @@ def generate_launch_description() -> LaunchDescription:
                 'num_cameras' : num_cameras,
                 'after_shutdown_map_save_path': nvblox_map_path
             },
-        ))
+        )
+    actions.append(nvblox_launch)
 
-    return LaunchDescription(actions)
+    return actions
+
+def generate_launch_description():
+    return LaunchDescription(
+        [
+            OpaqueFunction(function=launch_setup)
+    ]
+    )
